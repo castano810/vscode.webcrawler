@@ -1,20 +1,20 @@
+from scrapy.contrib.linkextractors.sgml import SgmlLinkExtractor
+from scrapy.contrib.spiders import CrawlSpider, Rule
+from scrapy.item import Item, Field
 import scrapy
 
+class MyItem():
+    url = Field()
 
 class QuotesSpider(scrapy.Spider):
     name = "quotes"
     start_urls = [
-        'http://quotes.toscrape.com/page/1/',
+        'http://www.twitter.com',
     ]
 
-    def parse(self, response):
-        for quote in response.css('div.quote'):
-            yield {
-                'text': quote.css('span.text::text').extract_first(),
-                'author': quote.css('small.author::text').extract_first(),
-                'tags': quote.css('div.tags a.tag::text').extract(),
-            }
+    rules = (Rule(SgmlLinkExtractor(), callback='parse_url', follow=False), )
 
-        next_page = response.css('li.next a::attr(href)').extract_first()
-        if next_page is not None:
-            yield response.follow(next_page, callback=self.parse)
+    def parse_url(self,response):
+        item = MyItem()
+        item['url'] = response.url
+        return item
